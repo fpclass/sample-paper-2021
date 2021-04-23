@@ -117,6 +117,10 @@
 			\ \\[0.5em] \hrule
 		\end{center}
 
+		\vspace{1cm}
+
+		\TheOtherInstructions
+
 		\pagebreak
 
 		\textbf{Instructions for students}
