@@ -1,0 +1,223 @@
+\allowdisplaybreaks
+%%% Question 4 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about equational reasoning. Suppose that natural numbers are defined as follows along with a functions for addition and multiplication of natural numbers:
+\begin{small}
+\begin{minted}{haskell}
+data Nat = Zero | Succ Nat
+
+add :: Nat -> Nat -> Nat 
+add Zero     m = m 
+add (Succ n) m = Succ (add n m)
+
+mul :: Nat -> Nat -> Nat
+mul Zero     m = Zero 
+mul (Succ n) m = add m (mul n m)
+\end{minted}
+\end{small}
+
+\begin{parts}
+    
+    % 4
+
+    \part[4] Multiplication distributes over addition:
+    \begin{center}
+        \haskellIn{add (mul a x) (mul b x) == mul (add a b) x}
+    \end{center}  
+    Assuming that \haskellIn{add} is associative (as proved in the lectures and module guide), prove that multiplication distributes over addition. \droppoints
+
+    \begin{solution}
+        \emph{Application. 2 marks for the base case and 2 marks for the inductive case.} The proof is by induction on $a$. In the base case we have $a=\mathit{Zero}$:
+        \begin{displaymath}
+            \begin{array}{cl}
+                \expr{\mathit{add}~(\mathit{mul}~\mathit{Zero}~x)~(\mathit{mul}~b~x)}
+                \hint{applying $\mathit{mul}$}
+                \expr{\mathit{add}~\mathit{Zero}~(\mathit{mul}~b~x)}
+                \hint{applying $\mathit{mul}$}
+                \expr{\mathit{mul}~b~x}
+                \hint{unapplying $\mathit{add}$}
+                \lastexpr{\mathit{mul}~(\mathit{add}~\mathit{Zero}~b)~x}
+            \end{array}
+        \end{displaymath}
+        We may then assume that the property holds for $a$ to show the case where we have $\mathit{Succ}~a$:
+        \begin{displaymath}
+            \begin{array}{cl}
+                \expr{\mathit{add}~(\mathit{mul}~(\mathit{Succ}~a)~x)~(\mathit{mul}~b~x)}
+                \hint{applying $\mathit{mul}$}
+                \expr{\mathit{add}~(\mathit{add}~x~(\mathit{mul}~a~x))~(\mathit{mul}~b~x)}
+                \hint{associativity of $\mathit{add}$}
+                \expr{\mathit{add}~x~(\mathit{add}~(\mathit{mul}~a~x)~(\mathit{mul}~b~x))}
+                \hint{induction hypothesis}
+                \expr{\mathit{add}~x~(\mathit{mul}~(\mathit{add}~a~b)~x)}
+                \hint{unapplying $\mathit{mul}$}
+                \expr{\mathit{mul}~(\mathit{Succ}~(\mathit{add}~a~b))~x}
+                \hint{unapplying $\mathit{add}$}
+                \lastexpr{\mathit{mul}~(\mathit{add}~(\mathit{Succ}~a)~b)~x}
+            \end{array}
+        \end{displaymath}
+    \end{solution}
+
+    \part[4] Multiplication is an associative binary operation:   
+        \begin{center}
+            \haskellIn{mul (mul x y) z == mul x (mul y z)}
+        \end{center}
+        With the help of the property that multiplication distributes over addition that you proved for the previous part, prove that this property holds as well. \droppoints
+    
+        \begin{solution}
+            \emph{Application. 2 marks for base case. 2 marks for inductive step.} The proof is as follows, by induction on $x$: 
+            \begin{displaymath}
+            \begin{array}{cl}
+            \expr{\mathit{mul}~\mathit{Zero}~(\mathit{mul~y~z})}
+            \hint{applying $\mathit{mul}$}
+            \expr{\mathit{Zero}}
+            \hint{unapplying $\mathit{mul}$}
+            \expr{\mathit{mul}~\mathit{Zero}~z}
+            \hint{unapplying $\mathit{mul}$}
+            \lastexpr{\mathit{mul}~(\mathit{mul}~\mathit{Zero}~y)~z}
+            \end{array}
+            \end{displaymath}
+            The inductive step is for $\mathit{Succ}~x$ assuming that the property holds for $x$:
+            \begin{displaymath}
+            \begin{array}{cl}
+                \expr{\mathit{mul}~(\mathit{Succ}~x)~(\mathit{mul~y~z})}
+                \hint{applying $\mathit{mul}$}
+                \expr{\mathit{add}~(\mathit{mul~y~z})~(\mathit{mul}~x~(\mathit{mul~y~z}))}
+                \hint{induction hypothesis}
+                \expr{\mathit{add}~(\mathit{mul~y~z})~(\mathit{mul}~(\mathit{mul}~x~y)~z)}
+                \hint{multiplication distributes over addition}
+                \expr{\mathit{mul}~(\mathit{add}~y~(\mathit{mul}~x~y))~z}
+                \hint{unapplying $\mathit{mul}$}
+                \lastexpr{\mathit{mul}~(\mathit{mul}~(\mathit{Succ}~x)~y)~z}
+            \end{array}
+            \end{displaymath}
+        \end{solution}
+
+    \part[5] Consider the following property about \haskellIn{replicate} and \haskellIn{(++)}:
+    \begin{center}
+        \haskellIn{replicate n x ++ replicate m x == replicate (add n m) x}
+    \end{center}
+    Assume that \haskellIn{replicate} is defined as follows:
+    \begin{small}
+        \begin{minted}{haskell}
+replicate :: Nat -> a -> [a]
+replicate Zero     x = []
+replicate (Succ n) x = x : replicate n x
+        \end{minted}
+    \end{small}
+    Prove that the property shown above holds. \droppoints
+
+    \begin{solution}
+        \emph{Application.} The proof is by induction on $n$. The base case is for $\mathit{Zero}$:
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{replicate}~\mathit{Zero}~x \append \mathit{replicate}~m~x}
+        \hint{applying $\mathit{replicate}$}
+        \expr{\hslist{} \append \mathit{replicate}~m~x}
+        \hint{applying $\append$}
+        \expr{\mathit{replicate}~m~x}
+        \hint{unapplying $\mathit{add}$}
+        \lastexpr{\mathit{replicate}~(\mathit{add}~\mathit{Zero}~m)~x}
+        \end{array}
+        \end{displaymath}
+        The inductive case is for $\mathit{Succ}~n$:
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{replicate}~(\mathit{Succ}~n)~x \append \mathit{replicate}~m~x}
+        \hint{applying $\mathit{replicate}$}
+        \expr{(x : \mathit{replicate}~n~x) \append \mathit{replicate}~m~x}
+        \hint{applying $\append$}
+        \expr{x : (\mathit{replicate}~n~x \append \mathit{replicate}~m~x)}
+        \hint{induction hypothesis}
+        \expr{x : (\mathit{replicate}~(\mathit{add}~n~m)~x)}
+        \hint{unapplying $\mathit{replicate}$}
+        \expr{\mathit{replicate}~(\mathit{Succ}~(\mathit{add}~n~m))~x}
+        \hint{unapplying $\mathit{add}$}
+        \lastexpr{\mathit{replicate}~(\mathit{add}~(\mathit{Succ}~n)~m)~x}
+        \end{array}
+        \end{displaymath}
+    \end{solution}
+
+    \part[12] Prove the following property which states the length of concatenating a list of lists is the same as calculating the length of each individual list and then calculating the sum of the results:   
+    \begin{center}
+        \haskellIn{length (concat xss) == sum (map length xss)}
+    \end{center}
+    You may assume that the usual properties of integers and arithmetic operations on them have already been proved. \droppoints
+
+    \begin{solution}
+        \emph{Application.} This question has two proofs hidden in one and there are 6 marks available for each proof (2 for base case + 4 for inductive step each). 
+        
+        Let us begin with the proof for the property shown by induction on $\mathit{xss}$. The base case is for $\hslist{}$:
+        
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{length}~(\mathit{concat}~\hslist{})}
+        \hint{applying $\mathit{concat}$}
+        \expr{\mathit{length}~\hslist{}}
+        \hint{applying $\mathit{length}$}
+        \expr{0}
+        \hint{unapplying $\mathit{sum}$}
+        \expr{\mathit{sum}~\hslist{}}
+        \hint{unapplying $\mathit{map}~\mathit{length}$}
+        \lastexpr{\mathit{sum}~(\mathit{map}~\mathit{length}~\hslist{})}
+        \end{array}
+        \end{displaymath}
+        
+        Then we can prove the inductive case for $\mathit{xs}:\mathit{xss}$:
+        
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{length}~(\mathit{concat}~(\mathit{xs}:\mathit{xss}))}
+        \hint{applying $\mathit{concat}$}
+        \expr{\mathit{length}~(\mathit{xs} \append \mathit{concat}~\mathit{xss})}
+        \hint{lemma proved below}
+        \expr{\mathit{length}~\mathit{xs} + \mathit{length}~(\mathit{concat}~\mathit{xss})}
+        \hint{induction hypothesis}
+        \expr{\mathit{length}~\mathit{xs} + \mathit{sum}~(\mathit{map}~\mathit{length}~\mathit{xss})}
+        \hint{unapplying $\mathit{sum}$}
+        \expr{\mathit{sum}~(\mathit{length}~\mathit{xs} : \mathit{map}~\mathit{length}~\mathit{xss})}
+        \hint{unapplying $\mathit{map}~\mathit{length}$}
+        \lastexpr{\mathit{sum}~(\mathit{map}~\mathit{length}~(\mathit{xs}:\mathit{xss}))}
+        \end{array}
+        \end{displaymath}
+        
+        As shown in the proof above, a lemma about how $\mathit{length}$ distributes over $\append$ is required:
+        
+        \begin{center}
+            \begin{small}
+                \begin{verbatim}
+                length (xs ++ ys) == length xs + length ys
+                \end{verbatim}
+            \end{small}
+        \end{center}
+        
+        The proof is by induction on $\mathit{xs}$. First the base case for $\hslist{}$:
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{length}~(\hslist{} \append \mathit{ys})}
+        \hint{applying $\append$}
+        \expr{\mathit{length}~\mathit{ys}}
+        \hint{identity of addition}
+        \expr{0 + \mathit{length}~\mathit{ys}}
+        \hint{unapplying $\mathit{length}$}
+        \lastexpr{\mathit{length}~\hslist{} + \mathit{length}~\mathit{ys}}
+        \end{array}
+        \end{displaymath}
+        
+        Then the inductive case for $x:\mathit{xs}$:
+        
+        \begin{displaymath}
+        \begin{array}{cl}
+        \expr{\mathit{length}~((x:\mathit{xs}) \append \mathit{ys})}
+        \hint{applying $\append$}
+        \expr{\mathit{length}~(x : (\mathit{xs} \append \mathit{ys}))}
+        \hint{applying $\mathit{length}$}
+        \expr{1 + \mathit{length}~(\mathit{xs} \append \mathit{ys})}
+        \hint{induction hypothesis}
+        \expr{1 + \mathit{length}~\mathit{xs} + \mathit{length}~\mathit{ys}}
+        \hint{unapplying $\mathit{length}$}
+        \lastexpr{\mathit{length}~(x:\mathit{xs}) + \mathit{length}~\mathit{ys}}
+        \end{array}
+        \end{displaymath}
+        This concludes the proof.
+    \end{solution}
+    
+\end{parts}

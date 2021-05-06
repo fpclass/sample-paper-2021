@@ -1,0 +1,54 @@
+%-----------------------------------------------------------
+% LaTeX template for University of Warwick exams
+%-----------------------------------------------------------
+
+% load the uow-exam class, the following options are supported:
+% 'answers' shows solutions where specified 
+\documentclass[palatino, code, aep]{uow-exam}
+
+\usepackage{fancyeq}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+
+% configure the heading 
+\ModuleCode{CS141}
+\ModuleName{Functional Programming} % for aep, this should be all caps
+\ExamPeriod{Sample 2021}  
+\ExamCode{CS1410\_B}
+\TimeAllowed{2 hours} % either 2 hours or 3 hours
+\QuestionInstructions{There are \textbf{SIX} questions. Candidates should attempt \textbf{FOUR} questions.}
+\OtherInstructions{Instructions specific to this module:
+\begin{itemize}
+    \item The questions are not in order of difficulty.
+    \item Unless stated otherwise, you should assume that library functions are defined as shown in the module guide.
+\end{itemize}
+General exam instructions follow on the next page.}
+
+% use this if your exam paper contains sections or comment it out otherwise
+% \NoBreakAfterQuestions
+
+\setminted[text]{fontsize=\small}
+\setminted[haskell]{fontsize=\small}
+\setminted[bash]{fontsize=\small}
+\newcommand{\haskellTopIn}[1]{\mintinline[fontsize=\small]{text}{#1}}
+\newcommand{\haskellIn}[1]{\mintinline[fontsize=\small,breaklines]{text}{#1}}
+\newcommand{\bashIn}[1]{\mintinline[fontsize=\small]{bash}{#1}}
+
+\usepackage[nomap]{FiraMono}
+
+\usepackage{amsmath}
+\usepackage{microtype}
+\DisableLigatures[f]{encoding = *, family = tt* }
+
+\begin{document}
+	\MakeHeading
+	
+    \begin{questions}
+        \input{q1.tex}
+        \input{q2.tex}
+        \input{q3.tex}
+        \input{q4.tex}
+        \input{q5.tex}
+        \input{q6.tex}
+    \end{questions}
+\end{document}

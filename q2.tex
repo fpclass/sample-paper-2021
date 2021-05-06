@@ -1,0 +1,132 @@
+%%% Question 2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about recursive and higher-order functions.
+\begin{parts}
+    \part[4] Define a function 
+    \begin{minted}{haskell}
+isPrime :: Integer -> Bool
+    \end{minted}
+    which given an integer value, determines whether it is a prime number. For example, \haskellIn{isPrime 3} should evaluate to \haskellIn{True}. \droppoints
+    
+    \begin{solution}
+    \emph{Application.} A simple solution using a list comprehension is:
+    \begin{minted}{haskell}
+isPrime :: Integer -> Bool 
+isPrime n = null [x | x <- [2..n-1], n `mod` x == 0]
+    \end{minted}
+    \end{solution}
+
+    \part[2] With the help of \haskellIn{isPrime}, write a definition 
+    \begin{minted}{haskell}
+primes :: [Integer]
+    \end{minted}
+    which represents the \emph{infinite} list of prime numbers. For example, the expression \haskellIn{take 4 primes} should evaluate to \haskellIn{[2,3,5,7]}. \droppoints
+    
+    \begin{solution} \emph{Application.}
+    \begin{minted}{haskell}
+primes :: [Integer]
+primes = [n | n <- [2..], isPrime n]
+    \end{minted}
+    \end{solution}
+
+    \part Two words are anagrams of each other if they are made up of the same characters. For example, \haskellIn{"team"} and \haskellIn{"meta"} are anagrams of each other. One method for determining whether two words are anagrams of each other is to assign a unique prime number to each character in the alphabet, map each character in a given word to its corresponding prime number, and then calculate the product of all those numbers. The product of two or more prime numbers is guaranteed to be unique for those prime factors so if two words result in the same product, they must be anagrams of each other. 
+
+    \begin{subparts}
+        \subpart[4] Write a function 
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+toPrime :: Char -> Integer
+        \end{minted}	
+        \vspace*{0.2cm}
+        which maps each character in the alphabet to a unique prime number. For example, \haskellIn{toPrime 'A'} and \haskellIn{toPrime 'a'} could evaluate to \haskellIn{2} while \haskellIn{toPrime 'C'} could evaluate to \haskellIn{5}. \emph{Hint}: the \haskellIn{ord :: Char -> Int} function maps characters to their corresponding integer value in the ASCII encoding.  \droppoints 
+        
+        \begin{solution}
+            \emph{Application.} 
+            \begin{minted}{haskell}
+toPrime :: Char -> Integer
+toPrime c = primes !! (ord (toUpper c) - ord 'A')
+            \end{minted}
+        \end{solution}
+        
+        \subpart[3] With the help of \haskellIn{toPrime}, define a function
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+score :: String -> Integer
+        \end{minted}
+        \vspace*{0.2cm}	
+        which calculates the product of all the prime numbers for all the characters in the input string. For example, assuming that \haskellIn{toPrime} maps \haskellIn{'a'} to \haskellIn{2}, \haskellIn{'b'} to \haskellIn{3}, \haskellIn{'c'} to \haskellIn{5} and so on, \haskellIn{score "team"} should evaluate to \haskellIn{64042}. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.} 
+            \begin{minted}{haskell}
+score :: String -> Integer
+score = product . map toPrime
+            \end{minted}
+        \end{solution}
+    
+        \subpart[2] With the help of \haskellIn{score}, define a function 
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+isAnagram :: String -> String -> Bool
+        \end{minted}
+        \vspace*{0.2cm}	    
+        which determines whether two \haskellIn{String} values are anagrams of each other. For example, \haskellIn{isAnagram "team" "meta"} should evaluate to \haskellIn{True}. \droppoints 
+    
+        \begin{solution}
+            \emph{Application.} 
+            \begin{minted}{haskell}
+isAnagram :: String -> String -> Bool
+isAnagram xs ys = score xs == score ys
+            \end{minted}
+        \end{solution}
+    
+        \ifprintanswers \else \pagebreak \fi
+    
+        \subpart[5] With the help of the previous definitions, define a function
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+anagrams :: [String] -> [(String, [String])]
+        \end{minted}
+        \vspace*{0.2cm}	    
+        which, given a list of \haskellIn{String} values representing a list of words, returns a list of the same size in which every input word is mapped to a list of its anagrams. For example: \\[1mm]
+        \haskellIn{anagrams ["team", "meta", "meat", "late"]} \\
+        \haskellIn{=> [("team",["meta","meat"]),("meta",["team","meat"]),} \\
+        \haskellIn{    ("meat",["team","meta"]),("late",[])]} \droppoints 
+    
+        \begin{solution}
+            \emph{Application.} 
+            \begin{minted}{haskell}
+anagrams :: [String] -> [(String, [String])]
+anagrams xs = map (go xs) xs 
+    where go ys x = (x, [y | y <- ys, 
+                             isAnagram x y, x /= y])
+            \end{minted}
+        \end{solution}
+    
+        \subpart[5] With the help of the previous definitions, define a function
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+subgrams :: [String] -> [(String, [String])]
+        \end{minted}
+        \vspace*{0.2cm}    
+        which behaves like \haskellIn{anagrams}, except it also considers words which do not use every character from the original word. For example:\\[1mm]
+        \haskellIn{subgrams ["team", "meta", "eat", "tea"]} \\
+        \haskellIn{=> [("team",["meta","eat","tea"]),} \\
+        \haskellIn{ ("meta",["team","eat","tea"]),}\\
+        \haskellIn{    ("eat",["tea"]),("tea",["eat"])]} \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{minted}{haskell}
+subgrams :: [String] -> [(String, [String])]
+subgrams xs = map (go xs) xs 
+    where go ys x = (x, nub [y | y <- ys, 
+                                 w <- subsequences x, 
+                                 w /= [], 
+                                 isAnagram y w, 
+                                 x /= y])
+            \end{minted}
+        \end{solution}
+        
+    \end{subparts}
+
+\end{parts}

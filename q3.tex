@@ -1,0 +1,188 @@
+
+%%% Question 3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about user-defined types and type classes.
+\begin{parts}
+    
+    \part Consider a variant of rose trees where elements are stored in nodes rather than leaves such that, for example, the following is a valid definition:
+    \begin{small}
+        \begin{minted}{haskell}
+tree :: Tree String 
+tree = Node "Sakura" [Node "Rubber" []]
+        \end{minted}
+    \end{small}
+    
+    \begin{subparts}
+        
+        \subpart[3] Give a suitable definition for the \haskellIn{Tree} type. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+data Tree a = Node a [Tree a]
+                \end{minted}
+            \end{small}
+        \end{solution}
+    
+        \subpart[1] A collection of trees is referred to as a \emph{forest}. Define a suitable \emph{type alias} for \haskellIn{Forest a} which represents zero or more trees of  elements of type \haskellIn{a}. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+type Forest a = [Tree a]
+                \end{minted}
+            \end{small}
+        \end{solution}
+    
+        \subpart[4] The \haskellIn{Tree} type is a functor. Define a suitable instance of Haskell's \haskellIn{Functor} type class for it. Your solution should obey the functor laws, although you do not need to prove this. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.} 
+            \begin{small}
+                \begin{minted}{haskell}
+instance Functor Tree where 
+    fmap f (Node x ts) = Node (f x) (fmap (fmap f) ts)
+                \end{minted}
+            \end{small}
+        \end{solution}
+    
+        \subpart[4] Define a suitable instance of Haskell's \haskellIn{Foldable} type class for the \haskellIn{Tree} type.  \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+instance Foldable Tree where 
+    foldr f z (Node x ts) = 
+        f x (foldr (\t r -> foldr f r t) z ts)
+                \end{minted}
+            \end{small}
+        \end{solution} 
+        
+    \end{subparts}
+
+    \part A zipper is a purely functional data structure which can be used to efficiently traverse another data structure if the same element needs to be accessed repeatedly or element access is relative to the last-accessed element by allowing a particular element of the data structure to be ``focused''. Suppose that we have an implementation of binary trees as follows:
+    \begin{small}
+        \begin{minted}{haskell}
+data BinTree a = BinLeaf a | BinNode (BinTree a) (BinTree a)
+        \end{minted}
+    \end{small}
+    
+    \begin{subparts}
+        
+        \subpart[2] Define an algebraic data type named \haskellIn{Direction} so that it has two constructors with the following types:\\
+        \haskellIn{L :: BinTree a -> Direction a} \\
+        \haskellIn{R :: BinTree a -> Direction a} \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+data Direction a = L (BinTree a) | R (BinTree a)
+                \end{minted}
+            \end{small}
+        \end{solution}
+    
+        \subpart[1] Consider the following example definition that represents a value of a zipper on a \haskellIn{BinTree} in which we have already moved the ``focus'' from the root to the left child:
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+example :: BinZipper String
+example = Pos [L (BinLeaf "Right child")] 
+              (BinLeaf "Left child")
+        \end{minted}
+        \vspace*{0.2cm}
+        Give a suitable definition of the \haskellIn{BinZipper} type. \droppoints
+        
+        \begin{solution}
+            \emph{Comprehension.}
+            \begin{minted}{haskell}
+data BinZipper a = Pos [Direction a] (BinTree a)
+            \end{minted}
+        \end{solution}
+    
+        \subpart[1] A value of the \haskellIn{BinZipper} type can be used to represent a position within a binary tree, where \haskellIn{[Direction a]} represents a list of directions that were taken from the root and \haskellIn{BinTree a} is the node or leaf that is currently in ``focus''. Define a function
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+fromTree :: BinTree a -> BinZipper a
+        \end{minted}
+        \vspace*{0.2cm} 
+        which can be used to create an initial zipper for a given binary tree. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+fromTree :: BinTree a -> BinZipper a 
+fromTree t = Pos [] t
+                \end{minted}
+            \end{small}
+        \end{solution}
+        
+        \subpart[2] Define a function
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+view :: BinZipper a -> Maybe a
+        \end{minted}
+        \vspace*{0.2cm} 
+        which gets the element that is currently in the view, if there is one. For example, \haskellIn{view (Pos p (BinLeaf x))} should evaluate to \haskellIn{Just x}. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+view :: BinZipper a -> Maybe a 
+view (Pos ds (BinLeaf x)) = Just x 
+view (Pos ds _) = Nothing
+                \end{minted}
+            \end{small}
+        \end{solution}
+
+        \ifprintanswers \else \pagebreak \fi
+        
+        \subpart[4] Define two functions 
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+turnRight :: BinZipper a -> Maybe (BinZipper a)
+turnLeft  :: BinZipper a -> Maybe (BinZipper a)
+        \end{minted}
+        \vspace*{0.2cm}
+        which, given a current position in a tree, go down the right or left subtree, respectively. For example, \haskellIn{turnRight (Pos [] (BinNode l r))} should evaluate to \haskellIn{Just (Pos [R l] r)}. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.}
+            \begin{small}
+                \begin{minted}{haskell}
+turnRight :: BinZipper a -> Maybe (BinZipper a)
+turnRight (Pos ds (BinNode l r)) = Just (Pos (R l:ds) r)
+turnRight (Pos ds (BinLeaf _))   = Nothing
+
+turnLeft :: BinZipper a -> Maybe (BinZipper a)
+turnLeft (Pos ds (BinNode l r)) = Just (Pos (L r:ds) l)
+turnLeft (Pos ds (BinLeaf _))   = Nothing
+                \end{minted}
+            \end{small}
+        \end{solution}
+        
+        \subpart[3] Define a function 
+        \vspace*{0.2cm}
+        \begin{minted}{haskell}
+back :: BinZipper a -> Maybe (BinZipper a)
+        \end{minted}
+        \vspace*{0.2cm}	
+        which shifts the focus of the zipper up the tree to the parent of the node that is initially in focus. \droppoints 
+        
+        \begin{solution}
+            \emph{Application.} 
+            \begin{small}
+                \begin{minted}{haskell}
+back :: BinZipper a -> Maybe (BinZipper a)
+back (Pos [] _) = Nothing 
+back (Pos (L r:ds) t) = Just (Pos ds (BinNode t r))
+back (Pos (R l:ds) t) = Just (Pos ds (BinNode l t))
+                \end{minted}
+            \end{small}
+        \end{solution}
+        
+    \end{subparts}
+\end{parts}

@@ -1,0 +1,148 @@
+%%% Question 1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about functional programming as a programming paradigm.
+\begin{parts}
+\part Reduce all of the following Haskell expressions to normal forms. Your answers \emph{must} include all reduction steps. No marks are awarded for answers which just state the normal form.
+\begin{subparts}
+\subpart[2] \haskellIn{not False && (True || False)} \droppoints
+\begin{solution} \small
+\begin{verbatim}
+   not False && (True || False)
+=> True && (True || False)
+=> True && True
+=> True
+\end{verbatim}
+\end{solution}
+\subpart[2] \haskellIn{filter (\x -> x /= 2 && x /= 6) [1..6]} \droppoints
+\begin{solution} \small
+\begin{verbatim}
+   filter (\x -> x /= 2 && x /= 6) [1..6]
+== filter (\x -> x /= 2 && x /= 6) [1,2,3,4,5,6]
+=> 1 : filter (\x -> x /= 2 && x /= 6) [2,3,4,5,6]
+=> 1 : filter (\x -> x /= 2 && x /= 6) [3,4,5,6]
+=> 1 : 3 : filter (\x -> x /= 2 && x /= 6) [4,5,6]
+=> 1 : 3 : 4 : filter (\x -> x /= 2 && x /= 6) [5,6]
+=> 1 : 3 : 4 : 5 : filter (\x -> x /= 2 && x /= 6) [6]
+=> 1 : 3 : 4 : 5 : filter (\x -> x /= 2 && x /= 6) []
+=> 1 : 3 : 4 : 5 : []
+== [1,3,4,5]
+\end{verbatim}
+\end{solution}
+\subpart[2] \haskellIn{if (odd 6) then [] else (drop 2 [1..5])}  \droppoints
+\begin{solution} \small
+\begin{verbatim}
+   if (odd 6) then [] else (drop 2 [1..5])
+== if (odd 6) then [] else (drop 2 [1,2,3,4,5])
+=> if False then [] else (drop 2 [1,2,3,4,5])
+=> drop 2 [1,2,3,4,5]
+=> drop 1 [2,3,4,5]
+=> drop 0 [3,4,5]
+=> [3,4,5]
+\end{verbatim}
+\end{solution}
+\subpart[2] \haskellIn{fmap toUpper "seal"} \droppoints
+\begin{solution} \small
+\begin{verbatim}
+   fmap toUpper "seal"
+== fmap toUpper ['s', 'e', 'a', 'l']
+=> toUpper 's' : fmap toUpper ['e', 'a', 'l']
+=> 'S' : fmap toUpper ['e', 'a', 'l']
+=> 'S' : toUpper 'e' : fmap toUpper ['a', 'l']
+=> 'S' : 'E' : fmap toUpper ['a', 'l']
+=> 'S' : 'E' : toUpper 'a' : fmap toUpper ['l']
+=> 'S' : 'E' : 'A' : fmap toUpper ['l']
+=> 'S' : 'E' : 'A' : toUpper 'l' : fmap toUpper []
+=> 'S' : 'E' : 'A' : 'L' : fmap toUpper []
+=> 'S' : 'E' : 'A' : 'L' : []
+== ['S', 'E', 'A', 'L']
+== "SEAL"
+\end{verbatim}
+\end{solution}
+\subpart[2] \haskellIn{map (map snd) [[(4,'c')], [(8,'a'), (15,'r')], []]} \droppoints
+\begin{solution} \small
+\begin{verbatim}
+   map (map snd) [[(4,'c')], [(8,'a'), (15,'r')], []]
+=> map snd [(4,'c')] : 
+   map (map snd) [[(8,'a'), (15,'r')], []]
+=> [snd (4,'c')] : 
+   map (map snd) [[(8,'a'), (15,'r')], []]
+=> ['c'] : 
+   map (map snd) [[(8,'a'), (15,'r')], []]
+=> ['c'] : map snd [(8,'a'), (15,'r')] : 
+   map (map snd) [[]]
+=> ['c'] : [snd (8,'a'), snd (15,'r')] : 
+   map (map snd) [[]]
+=> ['c'] : ['a', 'r'] : map (map snd) [[]]
+=> ['c'] : ['a', 'r'] : map snd [] : map (map snd) []
+=> ['c'] : ['a', 'r'] : [] : map (map snd) []
+=> ['c'] : ['a', 'r'] : [] : []
+== [['c'], ['a', 'r'], []]
+== ["c","ar",""]
+\end{verbatim}
+\end{solution}
+\end{subparts}
+
+\part[3] Consider the following definition of the list difference operator \haskellIn{(\\)}:
+    \begin{minted}{haskell}
+(\\) :: Eq a => [a] -> [a] -> [a]
+xs \\ []     = xs 
+xs \\ (y:ys) = delete y (xs \\ ys)
+    \end{minted}
+    Define a function \haskellIn{diff} which is equivalent to \haskellIn{(\\)}, but is defined using \haskellIn{foldl} instead of explicit recursion. \droppoints 
+    
+    \begin{solution}
+    \emph{Application.} One possible answer is:
+    \begin{minted}{haskell}
+diff = foldl (flip delete)
+    \end{minted}
+    \end{solution}
+
+\begin{subparts}
+\subpart[4] \label{part:strict} Trace how \haskellIn{diff "abbc" "bd"} would be evaluated in a language with \emph{call-by-value} semantics. \droppoints
+\begin{solution}
+\emph{Comprehension.}
+\begin{small}
+\begin{verbatim}
+   diff "abbc" "bd"
+=> foldl (flip delete) "abbc" "bd"
+=> foldl (flip delete) (flip delete "abbc" 'b') "d"
+=> foldl (flip delete) "ac" "d"
+=> foldl (flip delete) (flip delete "ac" 'd') ""
+=> foldl (flip delete) "ac" ""
+=> "ac"
+\end{verbatim}
+\end{small}
+\end{solution}
+
+\subpart[4] \label{part:lazy} Trace how \haskellIn{diff "abbc" "bd"} would be evaluated in a language with \emph{call-by-name} semantics. You should assume that the value of this expression is required by some other part of the program. \droppoints
+\begin{solution} \emph{Comprehension.}
+\begin{small}
+\begin{verbatim}
+diff "abbc" "bd"
+=> foldl (flip delete) "abbc" "bd"
+=> foldl (flip delete) (flip delete "abbc" 'b') "d"
+=> foldl (flip delete) (flip delete 
+     (flip delete "abbc" 'b') 'd') ""
+=> flip delete (flip delete "abbc" 'b') 'd'
+=> flip delete "ac" 'd'
+=> "ac"
+\end{verbatim}
+\end{small}
+\end{solution}
+
+\subpart[4] Define a closed type family
+\vspace*{0.2cm}
+\begin{minted}{haskell}
+Delete :: Nat -> [Nat] -> [Nat]
+\end{minted}
+\vspace*{0.2cm}
+which removes the first occurrence of a type of kind \haskellIn{Nat} from a type-level list of types of kind \haskellIn{Nat}. For example, \haskellIn{Delete 'Zero ['Succ 'Zero, 'Zero, 'Zero]} should evaluate to \haskellIn{['Succ 'Zero, 'Zero]}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{minted}{haskell}
+type family Delete (a :: Nat) (xs :: [Nat]) :: [Nat] where
+    Delete a '[] = '[]
+    Delete a (a ': xs) = xs
+    Delete a (b ': xs) = b ': (Delete a xs)
+\end{minted}
+\end{solution}
+\end{subparts}
+\end{parts}

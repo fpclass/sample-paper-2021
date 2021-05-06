@@ -1,0 +1,166 @@
+
+%%% Question 5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about functors, applicative functors, and monads. Consider the following data type definition in Haskell. You may assume that functor, applicative functor, and monad laws have been proved for all instances of the respective type classes except your own. You may \textbf{not} make use of GHC extensions such as \texttt{\small DeriveFunctor}.
+\begin{parts} 
+    
+    \part[4] Define suitable instances of the \haskellIn{Functor}, \haskellIn{Applicative}, and \haskellIn{Monad} type classes for \haskellIn{(->) r} (functions whose domain is some type \haskellIn{r}). \emph{Hint}: it may be helpful to write down the specialised type signatures of the type class methods you need to define. \droppoints 
+    
+    \begin{solution} \emph{Application.} 1 mark for the \haskellIn{Functor} instance, 2 marks for the \haskellIn{Applicative} instance, and 1 mark for the \haskellIn{Monad} instance.
+    \begin{minted}{haskell}
+instance Functor ((->) r) where 
+    fmap = (.)
+    
+instance Applicative ((->) r) where 
+    pure = const 
+    
+    f <*> g = \x -> f x (g x)
+    
+instance Monad ((->) r) where 
+    f >>= k = \x -> k (f x) x
+    \end{minted}
+    \end{solution}
+
+    \part[13] Prove that your instance of \haskellIn{Applicative} type class for \haskellIn{(->) r} obeys the applicative functor laws. \droppoints
+
+    \begin{solution}
+        \allowdisplaybreaks
+        \emph{Application.} Identity:
+        \begin{displaymath}
+            \begin{array}[]{cl}
+                \expr{\mathit{pure}~\mathit{id} \applicative v}
+                \hint{applying $\mathit{pure}$}
+                \expr{\mathit{const}~\mathit{id} \applicative v}
+                \hint{applying $\applicative$}
+                \expr{\lambda x \to \mathit{const}~\mathit{id}~x~(v~x)}
+                \hint{applying $\mathit{const}$}
+                \expr{\lambda x \to \mathit{id}~(v~x)}
+                \hint{applying $\mathit{id}$}
+                \expr{\lambda x \to v~x}
+                \hint{$\eta$-conversion}
+                \lastexpr{v}
+            \end{array}
+        \end{displaymath}
+        Homomorphism:
+        \begin{displaymath}
+            \begin{array}[]{cl}
+                \expr{\mathit{pure}~f \applicative \mathit{pure}~v}
+                \hint{applying $\mathit{pure}$ twice}
+                \expr{\mathit{const}~f \applicative \mathit{const}~v}
+                \hint{applying $\applicative$}
+                \expr{\lambda x \to \mathit{const}~f~x~(\mathit{const}~v~x)}
+                \hint{applying $\mathit{const}$ twice}
+                \expr{\lambda x \to f~v}
+                \hint{definition of $\mathit{const}$}
+                \expr{\mathit{const}~(f~v)}
+                \hint{unapplying $\mathit{pure}$}
+                \lastexpr{\mathit{pure}~(f~v)}
+            \end{array}
+        \end{displaymath}
+        Interchange:
+        \begin{displaymath}
+            \begin{array}[]{cl}
+                \expr{u \applicative \mathit{pure}~y}
+                \hint{applying $\applicative$}
+                \expr{\lambda x \to u~x~(\mathit{pure}~y~x)}
+                \hint{applying $\mathit{pure}$}
+                \expr{\lambda x \to u~x~(\mathit{const}~y~x)}
+                \hint{applying $\mathit{const}$}
+                \expr{\lambda x \to u~x~y}
+                \hint{unapplying $\lambda f \to f~y$}
+                \expr{\lambda x \to (\lambda f \to f~y)~(u~x)}
+                \hint{unapplying $\$$}
+                \expr{\lambda x \to (\lambda f \to f~\$~y)~(u~x)}
+                \hint{syntactic sugar}
+                \expr{\lambda x \to (\$~y)~(u~x)}
+                \hint{unapplying $\mathit{const}$}
+                \expr{\lambda x \to \mathit{const}~(\$~y)~x~(u~x)}
+                \hint{unapplying $\applicative$}
+                \expr{\mathit{const}~(\$~y) \applicative u}
+                \hint{unapplying $\mathit{pure}$}
+                \lastexpr{\mathit{pure}~(\$~y) \applicative u}
+            \end{array}
+        \end{displaymath}
+        Composition:
+        \begin{displaymath}
+            \begin{array}{cl}
+                \expr{\mathit{pure}~(\circ) \applicative u \applicative v \applicative w}
+                \hint{applying $\applicative$}
+                \expr{(\lambda x \to \mathit{pure}~(\circ)~x~(u~x)) \applicative v \applicative w}
+                \hint{applying $\mathit{pure}$ and $\mathit{const}$}
+                \expr{(\lambda x \to (\circ)~(u~x)) \applicative v \applicative w}
+                \hint{applying $\applicative$}
+                \expr{(\lambda y \to (\lambda x \to (\circ)~(u~x))~y~(v~y)) \applicative w}
+                \hint{applying function}
+                \expr{(\lambda y \to (\circ)~(u~y)~(v~y)) \applicative w}
+                \hint{applying $\applicative$}
+                \expr{\lambda x \to (\lambda y \to (\circ)~(u~y)~(v~y))~x~(w~x)}
+                \hint{applying function}
+                \expr{\lambda x \to (\circ)~(u~x)~(v~x)~(w~x)}
+                \hint{applying $\circ$}
+                \expr{\lambda x \to (\lambda y \to u~x~(v~x~y))~(w~x)}
+                \hint{applying function}
+                \expr{\lambda x \to u~x~(v~x~(w~x))}
+                \hint{unapplying function}
+                \expr{\lambda x \to u~x~((\lambda y \to v~y~(w~y))~x)}
+                \hint{unapplying $\applicative$}
+                \expr{\lambda x \to u~x~((v \applicative w)~x)}
+                \hint{unapplying $\applicative$}
+                \lastexpr{u \applicative (v \applicative w)}
+            \end{array}
+        \end{displaymath}
+    \end{solution}
+
+    \part[8] Prove that your instance of the \texttt{Monad} type class for \haskellIn{(->) r} obeys the monad laws. \droppoints
+    
+    \begin{solution}
+    \emph{Application. 2 marks for the left identity. 2 marks for the right identity. 4 marks for associativity.} We can prove left identity through simple equational reasoning to rewrite one side of the equation to the other:
+
+    \begin{displaymath}
+    \begin{array}{cl}
+    \expr{\mathit{return}~x \bind f}
+    \hint{Definition of $\mathit{return}$}
+    \expr{\mathit{const}~x \bind f}
+    \hint{Definition of $\bind$}
+    \expr{\lambda r \to f~(\mathit{const}~x~r)~r}
+    \hint{Applying $\mathit{const}$}
+    \expr{\lambda r \to f~x~r}
+    \hint{$\eta$-conversion}
+    \lastexpr{f~x}
+    \end{array}
+    \end{displaymath}
+    The proof for right identity is also just accomplished through simple, equational reasoning:
+    \begin{displaymath}
+    \begin{array}{cl}
+    \expr{m \bind \mathit{return}}
+    \hint{Definition of $\bind$}
+    \expr{\lambda r \to \mathit{return}~(m~r)~r}
+    \hint{Definition of $\mathit{return}$}
+    \expr{\lambda r \to \mathit{const}~(m~r)~r}
+    \hint{Applying $\mathit{const}$}
+    \expr{\lambda r \to m~r}
+    \hint{$\eta$-conversion}
+    \lastexpr{m}
+    \end{array}
+    \end{displaymath}
+    The proof for associativity is also just accomplished through equational reasoning:
+    \begin{displaymath}
+    \begin{array}{cl}
+    \expr{(m \bind f) \bind g}
+    \hint{Definition of $\bind$}
+    \expr{(\lambda r \to f~(m~r)~r) \bind g}
+    \hint{Definition of $\bind$}
+    \expr{\lambda n \to g~((\lambda r \to f~(m~r)~r)~n)~n}
+    \hint{$\beta$-reduction}
+    \expr{\lambda n \to g~(f~(m~n)~n)~n}
+    \hint{$\beta$-reduction}
+    \expr{\lambda n \to (\lambda r \to g~(f~(m~n)~r)~r)~n}
+    \hint{Unapplying $\bind$}
+    \expr{\lambda n \to (f~(m~n) \bind g)~n}
+    \hint{$\beta$-reduction}
+    \expr{\lambda n \to (\lambda x \to f~x \bind g)~(m~n)~n}
+    \hint{Unapplying $\bind$}
+    \lastexpr{m \bind (\lambda x \to f~x \bind g)}
+    \end{array}
+    \end{displaymath}
+    \end{solution}
+\end{parts}
