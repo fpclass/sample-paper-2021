@@ -105,10 +105,10 @@ diff = foldl (flip delete)
    diff "abbc" "bd"
 => foldl (flip delete) "abbc" "bd"
 => foldl (flip delete) (flip delete "abbc" 'b') "d"
-=> foldl (flip delete) "ac" "d"
-=> foldl (flip delete) (flip delete "ac" 'd') ""
-=> foldl (flip delete) "ac" ""
-=> "ac"
+=> foldl (flip delete) "abc" "d"
+=> foldl (flip delete) (flip delete "abc" 'd') ""
+=> foldl (flip delete) "abc" ""
+=> "abc"
 \end{verbatim}
 \end{small}
 \end{solution}
@@ -123,8 +123,8 @@ diff "abbc" "bd"
 => foldl (flip delete) (flip delete 
      (flip delete "abbc" 'b') 'd') ""
 => flip delete (flip delete "abbc" 'b') 'd'
-=> flip delete "ac" 'd'
-=> "ac"
+=> flip delete "abc" 'd'
+=> "abc"
 \end{verbatim}
 \end{small}
 \end{solution}
