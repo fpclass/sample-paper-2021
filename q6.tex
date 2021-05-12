@@ -52,7 +52,7 @@ Delta :: State -> Symbol -> State
         \begin{solution}
             \emph{Application.}
 \begin{minted}{haskell}
-type family Delta (q :: Q) (e :: E) :: Q where 
+type family Delta (q :: State) (e :: Symbol) :: State where 
     Delta Q0 ONE  = Q3 
     Delta Q0 ZERO = Q1 
     Delta Q1 ONE  = Q2 
