@@ -60,8 +60,8 @@ jobs:
     - name: Publish to Sitebuilder 
       if: ${{ steps.init.outputs.HAS_SECRET }}
       env: 
-        SB_USER: ${{ secrets.SB_USER }}
-        SB_PASSWORD: ${{ secrets.SB_PASSWORD }}
+        UOW_USER: ${{ secrets.SB_USER }}
+        UOW_PASSWORD: ${{ secrets.SB_PASSWORD }}
       run: |
         sudo chmod +x ./bin/uow-util
         ./bin/uow-util sitebuilder upload --page /fac/sci/dcs/teaching/material/cs141 --file cs141-sample-2021.pdf --name cs141-sample-2021.pdf
