@@ -35,7 +35,7 @@ primes = [n | n <- [2..], isPrime n]
         \vspace*{0.2cm}
         \begin{minted}{haskell}
 toPrime :: Char -> Integer
-        \end{minted}	
+        \end{minted}
         \vspace*{0.2cm}
         which maps each character in the alphabet to a unique prime number. For example, \haskellIn{toPrime 'A'} and \haskellIn{toPrime 'a'} could evaluate to \haskellIn{2} while \haskellIn{toPrime 'C'} could evaluate to \haskellIn{5}. \emph{Hint}: the \haskellIn{ord :: Char -> Int} function maps characters to their corresponding integer value in the ASCII encoding.  \droppoints 
         
@@ -52,7 +52,7 @@ toPrime c = primes !! (ord (toUpper c) - ord 'A')
         \begin{minted}{haskell}
 score :: String -> Integer
         \end{minted}
-        \vspace*{0.2cm}	
+        \vspace*{0.2cm}
         which calculates the product of all the prime numbers for all the characters in the input string. For example, assuming that \haskellIn{toPrime} maps \haskellIn{'a'} to \haskellIn{2}, \haskellIn{'b'} to \haskellIn{3}, \haskellIn{'c'} to \haskellIn{5} and so on, \haskellIn{score "team"} should evaluate to \haskellIn{64042}. \droppoints 
         
         \begin{solution}
