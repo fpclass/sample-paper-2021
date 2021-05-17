@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Initialisation 
+      env: 
+        SB_USER: ${{ secrets.SB_USER }}
+        SB_PASSWORD: ${{ secrets.SB_PASSWORD }}
+      id: init
+      run: |
+        mkdir bin 
+        unset HAS_SECRET
+        if [[ -n "$SB_PASSWORD" ]]; then HAS_SECRET='true' ; fi
+        echo ::set-output name=HAS_SECRET::${HAS_SECRET}
+
+    - name: LaTeX compilation
+      uses: dante-ev/latex-action@v0.2.0
+      with:
+        root_file: cs141-sample-2021.tex
+        args: -bibtex -pdf -latexoption=-file-line-error -latexoption=-interaction=nonstopmode -latexoption=-shell-escape -latexoption=-synctex=1
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: cs141-sample-2021.pdf
+        path: cs141-sample-2021.pdf
+
+    - name: Download uow-util
+      if: ${{ steps.init.outputs.HAS_SECRET }}
+      uses: Legion2/download-release-action@v2.1.0
+      with:
+        repository: mbg/uow-apis
+        tag: 'latest'
+        path: bin
+        file: uow-util
+
+    - name: Publish to Sitebuilder 
+      if: ${{ steps.init.outputs.HAS_SECRET }}
+      env: 
+        SB_USER: ${{ secrets.SB_USER }}
+        SB_PASSWORD: ${{ secrets.SB_PASSWORD }}
+      run: |
+        sudo chmod +x ./bin/uow-util
+        ./bin/uow-util sitebuilder upload --page /fac/sci/dcs/teaching/material/cs141 --file cs141-sample-2021.pdf --name cs141-sample-2021.pdf
+
+    - uses: iRoachie/slack-github-actions@v2.3.0
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CS141_WEBHOOK_URL }}
+      with:
+        status: ${{ job.status }}
+      if: always() 
