@@ -24,17 +24,29 @@ jobs:
         if [[ -n "$SB_PASSWORD" ]]; then HAS_SECRET='true' ; fi
         echo ::set-output name=HAS_SECRET::${HAS_SECRET}
 
-    - name: LaTeX compilation
+    - name: Compile without solutions
       uses: dante-ev/latex-action@v0.2.0
       with:
         root_file: cs141-sample-2021.tex
         args: -bibtex -pdf -latexoption=-file-line-error -latexoption=-interaction=nonstopmode -latexoption=-shell-escape -latexoption=-synctex=1
 
-    - name: Upload build artifact
+    - name: Upload build artifact (without solutions)
       uses: actions/upload-artifact@v2
       with:
         name: cs141-sample-2021.pdf
         path: cs141-sample-2021.pdf
+        
+    - name: Compile with solutions
+      uses: dante-ev/latex-action@v0.2.0
+      with:
+        root_file: cs141-sample-2021-solutions.tex
+        args: -bibtex -pdf -latexoption=-file-line-error -latexoption=-interaction=nonstopmode -latexoption=-shell-escape -latexoption=-synctex=1
+
+    - name: Upload build artifact (with solutions)
+      uses: actions/upload-artifact@v2
+      with:
+        name: cs141-sample-2021-solutions.pdf
+        path: cs141-sample-2021-solutions.pdf
 
     - name: Download uow-util
       if: ${{ steps.init.outputs.HAS_SECRET }}
@@ -53,6 +65,7 @@ jobs:
       run: |
         sudo chmod +x ./bin/uow-util
         ./bin/uow-util sitebuilder upload --page /fac/sci/dcs/teaching/material/cs141 --file cs141-sample-2021.pdf --name cs141-sample-2021.pdf
+        ./bin/uow-util sitebuilder upload --page /fac/sci/dcs/teaching/material/cs141 --file cs141-sample-2021-solutions.pdf --name cs141-sample-2021-solutions.pdf
 
     - uses: iRoachie/slack-github-actions@v2.3.0
       env:
