@@ -102,7 +102,7 @@ type family Elem (x :: k) (xs :: [k]) :: Bool where
     Elem x (y ': xs) = Elem x xs
 
 type family Accepts 
-    (q :: Q) (fs :: [Q]) (w :: [E]) :: Bool where 
+    (q :: State) (fs :: [State]) (w :: [Symbol]) :: Bool where 
     Accepts q fs w = Elem (DeltaHat q w) fs
 \end{minted}
         \end{solution}
@@ -122,8 +122,8 @@ data SProxy (s :: Symbol) = SProxy
         \begin{solution}
             \emph{Application.} 
 \begin{minted}{haskell}
-class ReifySymbol (q :: E) where 
-    reifySymbol :: SProxy q -> E
+class ReifySymbol (q :: Symbol) where 
+    reifySymbol :: SProxy q -> Symbol
 
 instance ReifySymbol ZERO where 
     reifySymbol _ = ZERO 
